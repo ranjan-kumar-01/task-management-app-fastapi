@@ -1,7 +1,8 @@
-from src.tasks.dtos import TaskSchema
-from sqlalchemy.orm import Session
-from src.tasks.models import TaskModel
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from src.tasks.dtos import TaskSchema
+from src.tasks.models import TaskModel
 
 
 def create_task(body: TaskSchema, db: Session):
@@ -42,8 +43,8 @@ def update_task(body: TaskSchema, task_id: int, db: Session):
     # one_task.is_completed = body.is_completed
     #    ==> poor way for huge data <==
 
-    body = body.model_dump()
-    for key, value in body.items():
+    data = body.model_dump()
+    for key, value in data.items():
         setattr(one_task, key, value)
 
     db.add(one_task)
@@ -59,5 +60,5 @@ def delete_task(task_id: int, db: Session):
         raise HTTPException(404, detail="task id is incorrect")
     db.delete(one_task)
     db.commit()
-    return None
+    # return None
     # return {"status": "Task deleted successfully", "deleted data": one_task}

@@ -6,7 +6,7 @@ class Settings(BaseSettings):
         env_file=".env",
         extra="ignore"
     )
-    DB_CONNECTION: str
+    DB_CONNECTION: str = ""
 
 
 settings = Settings()
