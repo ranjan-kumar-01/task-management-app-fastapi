@@ -1,25 +1,30 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from src.tasks import controller
 from src.tasks.dtos import TaskResponseSchema, TaskSchema
 from src.utils.db import get_db
+from src.tasks.models import TaskModel
 
 task_routes = APIRouter(prefix="/tasks")
-db_dependency = Depends(get_db)
+
+# Reusable database dependency.
+db_dependency = Annotated[Session, Depends(get_db)]
 
 
 @task_routes.post(
     "/create", response_model=TaskResponseSchema, status_code=status.HTTP_201_CREATED
 )
-def create_task(body: TaskSchema, db: Session = db_dependency):
+def create_task(body: TaskSchema, db: db_dependency)->TaskModel:
     return controller.create_task(body, db)
 
 
 @task_routes.get(
     "/all_task", response_model=list[TaskResponseSchema], status_code=status.HTTP_200_OK
 )
-def get_all_task(db: Session = db_dependency):
+def get_all_task(db: db_dependency)->list[TaskModel]:
     return controller.get_task(db)
 
 
@@ -28,7 +33,7 @@ def get_all_task(db: Session = db_dependency):
     response_model=TaskResponseSchema,
     status_code=status.HTTP_200_OK,
 )
-def get_one_task(task_id: int, db: Session = db_dependency):
+def get_one_task(task_id: int, db: db_dependency)->TaskModel:
     return controller.get_one_task(task_id, db)
 
 
@@ -37,12 +42,12 @@ def get_one_task(task_id: int, db: Session = db_dependency):
     response_model=TaskResponseSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def update_task(body: TaskSchema, task_id: int, db: Session = db_dependency):
+def update_task(body: TaskSchema, task_id: int, db: db_dependency)->TaskModel:
     return controller.update_task(body, task_id, db)
 
 
 @task_routes.delete(
     "/delete/{task_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_one_task(task_id: int, db: Session = db_dependency):
+def delete_one_task(task_id: int, db: db_dependency)->None:
     return controller.delete_task(task_id, db)

@@ -1,0 +1,25 @@
+GET http://127.0.0.1:8000/tasks
+
+###
+
+POST http://127.0.0.1:8000/tasks
+Content-Type: application/json
+
+{
+  "title": "Learn FastAPI",
+  "description": "Build task management API"
+}
+
+###
+POST http://127.0.0.1:8000/user/login
+Content-Type: application/json
+
+{
+  "username": "ranjan_0101",
+  "password": "password"
+}
+
+###
+
+GET http://127.0.0.1:8000/user/is_auth
+
