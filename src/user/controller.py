@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from typing import cast
 
 import jwt
 from fastapi import HTTPException, Request, status
@@ -23,9 +24,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def register(body: UserSchema, db: Session) -> UserModel:
     # Check username
     existing_user = (
-        db.query(UserModel)
-        .filter(UserModel.username == body.username)
-        .first()
+        db.query(UserModel).filter(UserModel.username == body.username).first()
     )
 
     if existing_user:
@@ -35,11 +34,7 @@ def register(body: UserSchema, db: Session) -> UserModel:
         )
 
     # Check email
-    existing_email = (
-        db.query(UserModel)
-        .filter(UserModel.email == body.email)
-        .first()
-    )
+    existing_email = db.query(UserModel).filter(UserModel.email == body.email).first()
 
     if existing_email:
         raise HTTPException(
@@ -70,11 +65,7 @@ def register(body: UserSchema, db: Session) -> UserModel:
 
 
 def login(body: LoginSchema, db: Session) -> dict[str, str]:
-    user = (
-        db.query(UserModel)
-        .filter(UserModel.username == body.username)
-        .first()
-    )
+    user = db.query(UserModel).filter(UserModel.username == body.username).first()
 
     # Use the same message for both cases. prevents revealing whether a username exists.
     invalid_credentials = HTTPException(
@@ -85,12 +76,12 @@ def login(body: LoginSchema, db: Session) -> dict[str, str]:
     if not user:
         raise invalid_credentials
 
-    if not verify_password(body.password, user.hash_password):
+    if not verify_password(body.password, cast(str, user.hash_password)):
         raise invalid_credentials
 
     expire_time = datetime.now(UTC) + timedelta(
-        # minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        # seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
     payload = {
@@ -108,6 +99,7 @@ def login(body: LoginSchema, db: Session) -> dict[str, str]:
 
 
 #####  TOKEN SEND
+
 
 def is_authenticated(request: Request, db: Session) -> UserModel:
     authorization = request.headers.get("Authorization")
@@ -157,11 +149,7 @@ def is_authenticated(request: Request, db: Session) -> UserModel:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = (
-        db.query(UserModel)
-        .filter(UserModel.id == int(user_id))
-        .first()
-    )
+    user = db.query(UserModel).filter(UserModel.id == int(user_id)).first()
 
     if not user:
         raise HTTPException(

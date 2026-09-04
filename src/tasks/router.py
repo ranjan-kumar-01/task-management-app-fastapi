@@ -5,26 +5,32 @@ from sqlalchemy.orm import Session
 
 from src.tasks import controller
 from src.tasks.dtos import TaskResponseSchema, TaskSchema
-from src.utils.db import get_db
 from src.tasks.models import TaskModel
+from src.user.models import UserModel
+from src.utils.db import get_db
+from src.utils.helper import is_authenticated
 
 task_routes = APIRouter(prefix="/tasks")
 
 # Reusable database dependency.
 db_dependency = Annotated[Session, Depends(get_db)]
 
+user_dependancy = Annotated[UserModel, Depends(is_authenticated)]
+
 
 @task_routes.post(
     "/create", response_model=TaskResponseSchema, status_code=status.HTTP_201_CREATED
 )
-def create_task(body: TaskSchema, db: db_dependency)->TaskModel:
+def create_task(
+    body: TaskSchema, db: db_dependency, user: user_dependancy
+) -> TaskModel:
     return controller.create_task(body, db)
 
 
 @task_routes.get(
     "/all_task", response_model=list[TaskResponseSchema], status_code=status.HTTP_200_OK
 )
-def get_all_task(db: db_dependency)->list[TaskModel]:
+def get_all_task(db: db_dependency, user: user_dependancy) -> list[TaskModel]:
     return controller.get_task(db)
 
 
@@ -33,7 +39,7 @@ def get_all_task(db: db_dependency)->list[TaskModel]:
     response_model=TaskResponseSchema,
     status_code=status.HTTP_200_OK,
 )
-def get_one_task(task_id: int, db: db_dependency)->TaskModel:
+def get_one_task(task_id: int, db: db_dependency, user: user_dependancy) -> TaskModel:
     return controller.get_one_task(task_id, db)
 
 
@@ -42,12 +48,14 @@ def get_one_task(task_id: int, db: db_dependency)->TaskModel:
     response_model=TaskResponseSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def update_task(body: TaskSchema, task_id: int, db: db_dependency)->TaskModel:
+def update_task(
+    body: TaskSchema, task_id: int, db: db_dependency, user: user_dependancy
+) -> TaskModel:
     return controller.update_task(body, task_id, db)
 
 
 @task_routes.delete(
     "/delete/{task_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_one_task(task_id: int, db: db_dependency)->None:
+def delete_one_task(task_id: int, db: db_dependency, user: user_dependancy) -> None:
     return controller.delete_task(task_id, db)

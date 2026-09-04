@@ -1,12 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
 from src.user import controller
 from src.user.dtos import LoginSchema, UserResponseSchema, UserSchema
-from src.utils.db import get_db
 from src.user.models import UserModel
+from src.utils.db import get_db
 
 user_routes = APIRouter(prefix="/user")
 

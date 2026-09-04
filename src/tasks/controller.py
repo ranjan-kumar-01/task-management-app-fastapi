@@ -61,8 +61,8 @@ def get_one_task(task_id: int, db: Session) -> TaskModel:
 
 def update_task(body: TaskSchema, task_id: int, db: Session) -> TaskModel:
     """
-        Update an existing task.
-        """
+    Update an existing task.
+    """
 
     # Find the task that needs to be updated.
     one_task = db.get(TaskModel, task_id)
