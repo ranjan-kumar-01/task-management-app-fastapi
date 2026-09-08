@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from typing import cast
 
 from src.tasks.dtos import TaskSchema
 from src.tasks.models import TaskModel
@@ -75,7 +76,7 @@ def update_task(body: TaskSchema, task_id: int, db: Session, user: UserModel) ->
             detail="Task not found",
         )
 
-    if one_task.user_id != user.id:
+    if cast(int, one_task.user_id) != cast(int, user.id):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You are not allowed to update this task",
@@ -112,7 +113,7 @@ def delete_task(task_id: int, db: Session, user: UserModel) -> None:
             detail="Task not found",
         )
 
-    if one_task.user_id != user.id:
+    if cast(int, one_task.user_id) != cast(int, user.id):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You are not allowed to delete this task",
