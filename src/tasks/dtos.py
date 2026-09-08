@@ -12,5 +12,6 @@ class TaskResponseSchema(BaseModel):
     title: str
     description: str
     is_completed: bool = False
+    user_id:int
 
     model_config = {"from_attributes": True}

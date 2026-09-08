@@ -6,5 +6,6 @@ from src.utils.db import Base, engine
 
 Base.metadata.create_all(engine)
 app = FastAPI(title="Task Management App With FastApi")
+
 app.include_router(task_routes)
 app.include_router(user_routes)

@@ -1,30 +1,26 @@
 import jwt
-from fastapi import HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials
 
 from src.user.models import UserModel
 from src.user.router import db_dependency
+from src.utils.auth import security
 from src.utils.settings import settings
 
 
-def is_authenticated(request: Request, db: db_dependency) -> UserModel:
-    authorization = request.headers.get("Authorization")
-    if not authorization:
+def is_authenticated(
+    request: Request,
+    db: db_dependency,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+) -> UserModel:
+    if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authorization header missing",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    parts = authorization.split()
-
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization header",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token = parts[1]
+    access_token = credentials.credentials
 
     try:
         payload = jwt.decode(
