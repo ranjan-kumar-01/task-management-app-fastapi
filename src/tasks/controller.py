@@ -37,9 +37,9 @@ def create_task(body: TaskSchema, db: Session, user: UserModel) -> TaskModel:
     return new_task
 
 
-def get_task(db: Session) -> list[TaskModel]:
+def get_task(db: Session, user: UserModel) -> list[TaskModel]:
     # Fetch all task records.
-    tasks = db.query(TaskModel).all()
+    tasks = db.query(TaskModel).filter(TaskModel.user_id == user.id).all()
     return tasks
 
 
@@ -61,7 +61,7 @@ def get_one_task(task_id: int, db: Session) -> TaskModel:
     return one_task
 
 
-def update_task(body: TaskSchema, task_id: int, db: Session) -> TaskModel:
+def update_task(body: TaskSchema, task_id: int, db: Session, user: UserModel) -> TaskModel:
     """
     Update an existing task.
     """
@@ -73,6 +73,12 @@ def update_task(body: TaskSchema, task_id: int, db: Session) -> TaskModel:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found",
+        )
+
+    if one_task.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not allowed to update this task",
         )
 
     # Convert the Pydantic model into a dictionary.
@@ -92,7 +98,7 @@ def update_task(body: TaskSchema, task_id: int, db: Session) -> TaskModel:
     return one_task
 
 
-def delete_task(task_id: int, db: Session) -> None:
+def delete_task(task_id: int, db: Session, user: UserModel) -> None:
     """
     Delete a task by its ID.
     """
@@ -106,8 +112,16 @@ def delete_task(task_id: int, db: Session) -> None:
             detail="Task not found",
         )
 
+    if one_task.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not allowed to delete this task",
+        )
+
     # Mark the task for deletion.
     db.delete(one_task)
 
     # Save the deletion to the database.
     db.commit()
+
+    #.........delete fn don't return anything.......
