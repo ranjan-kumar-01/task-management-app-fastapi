@@ -30,8 +30,8 @@ conf = ConnectionConfig(
 )
 
 
-async def send_email(emails: List[str]):
-    html = """
+async def send_email(emails: List[str], user_name: str):
+    html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -133,7 +133,7 @@ async def send_email(emails: List[str]):
                                     font-weight: 600;
                                     color: #111827;
                                 ">
-                                    Hello 👋
+                                    Hello {user_name}👋
                                 </p>
 
                                 <p style="
@@ -298,7 +298,7 @@ async def send_email(emails: List[str]):
     """
 
     message = MessageSchema(
-        subject="Welcome to Task Management App",
+        subject="Welcome to Task Management App 📝",
         recipients=[NameEmail(name="", email=email) for email in emails],
         body=html,
         subtype=MessageType.html,
@@ -308,4 +308,5 @@ async def send_email(emails: List[str]):
 
     await fm.send_message(message)
 
+    print("message: Email has been sent successfully")
     return {"message": "Email has been sent successfully"}
